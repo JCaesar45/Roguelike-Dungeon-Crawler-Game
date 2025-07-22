@@ -1,0 +1,107 @@
+// Constants
+const TILE_SIZE = 32;
+const MAP_WIDTH = 20;
+const MAP_HEIGHT = 20;
+
+// Canvas setup
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Game state
+let game = {
+  map: [],
+  player: {
+    x: 1,
+    y: 1,
+    health: 100,
+    level: 1,
+    xp: 0,
+    weapon: { name: "Fists", damage: [1, 3] },
+  },
+  enemies: [],
+  items: [],
+  visible: [],
+  gameOver: false,
+  won: false,
+};
+
+// Utility functions
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Initialize map with walls and empty spaces
+function generateMap() {
+  for (let y = 0; y < MAP_HEIGHT; y++) {
+    game.map[y] = [];
+    for (let x = 0; x < MAP_WIDTH; x++) {
+      if (x === 0 || y === 0 || x === MAP_WIDTH -1 || y === MAP_HEIGHT -1 || Math.random() < 0.1) {
+        game.map[y][x] = 'wall';
+      } else {
+        game.map[y][x] = 'floor';
+      }
+    }
+  }
+}
+
+// Generate random items and enemies
+function generateItemsAndEnemies() {
+  // Place some health items
+  for (let i=0; i<10; i++) {
+    placeRandom('health');
+  }
+  // Place weapons
+  placeRandom('weapon');
+  // Place enemies
+  for (let i=0; i<15; i++) {
+    placeRandom('enemy');
+  }
+  // Place boss
+  placeRandom('boss');
+}
+
+function placeRandom(type) {
+  let x, y;
+  do {
+    x = randInt(1, MAP_WIDTH - 2);
+    y = randInt(1, MAP_HEIGHT - 2);
+  } while (game.map[y][x] !== 'floor' || isOccupied(x,y));
+  switch(type) {
+    case 'health':
+      game.items.push({type:'health', x, y, amount: randInt(10,30)});
+      break;
+    case 'weapon':
+      // Better weapons
+      const weapons = [
+        { name: "Iron Sword", damage: [3,6] },
+        { name: "Steel Axe", damage: [4,8] },
+        { name: "Magic Wand", damage: [2,10] }
+      ];
+      game.items.push({type:'weapon', x, y, weapon: weapons[randInt(0,weapons.length-1)]});
+      break;
+    case 'enemy':
+      game.enemies.push({x,y, level: randInt(1,3), health: randInt(20,50) });
+      break;
+    case 'boss':
+      game.enemies.push({x,y, level: 5, health: 100, boss:true});
+      break;
+  }
+}
+
+function isOccupied(x,y) {
+  // Player, enemies, items
+  if(game.player.x===x && game.player.y===y) return true;
+  for (let e of game.enemies) if(e.x===x && e.y===y) return true;
+  for (let item of game.items) if(item.x===x && item.y===y) return true;
+  return false;
+}
+
+// Initialize game
+function init() {
+  generateMap();
+  generateItemsAndEnemies();
+  updateVisibility();
+  draw();
+}
+
+init();
