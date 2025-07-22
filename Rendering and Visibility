@@ -1,0 +1,64 @@
+function updateVisibility() {
+  game.visible = [];
+  const radius = 3; // visibility radius
+  for (let y=0; y<MAP_HEIGHT; y++) {
+    for (let x=0; x<MAP_WIDTH; x++) {
+      const dist = Math.abs(x - game.player.x) + Math.abs(y - game.player.y);
+      if (dist <= radius) {
+        game.visible.push({x,y});
+      }
+    }
+  }
+}
+
+function isVisible(x,y) {
+  return game.visible.some(pos => pos.x===x && pos.y===y);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  for (let y=0; y<MAP_HEIGHT; y++) {
+    for (let x=0; x<MAP_WIDTH; x++) {
+      if (isVisible(x,y)) {
+        const tile = game.map[y][x];
+        if (tile==='wall') {
+          ctx.fillStyle='gray';
+        } else {
+          ctx.fillStyle='black';
+        }
+        ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        
+        // Draw items
+        for (let item of game.items) {
+          if (item.x===x && item.y===y) {
+            ctx.fillStyle='green';
+            ctx.fillRect(x*TILE_SIZE+8, y*TILE_SIZE+8, 16,16);
+          }
+        }
+        // Draw enemies
+        for (let enemy of game.enemies) {
+          if (enemy.x===x && enemy.y===y) {
+            ctx.fillStyle=enemy.boss ? 'red':'orange';
+            ctx.beginPath();
+            ctx.arc(x*TILE_SIZE+16, y*TILE_SIZE+16, 10, 0, Math.PI*2);
+            ctx.fill();
+          }
+        }
+      } else {
+        ctx.fillStyle='#222'; // hidden
+        ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+  // Draw player
+  ctx.fillStyle='blue';
+  ctx.beginPath();
+  ctx.arc(game.player.x*TILE_SIZE+16, game.player.y*TILE_SIZE+16, 10, 0, Math.PI*2);
+  ctx.fill();
+
+  // Update stats
+  document.getElementById('stats').innerHTML = `
+    Health: ${game.player.health} | Level: ${game.player.level} | XP: ${game.player.xp} | Weapon: ${game.player.weapon.name}
+  `;
+}
