@@ -1,0 +1,27 @@
+function checkItems(x,y) {
+  const index = game.items.findIndex(i => i.x===x && i.y===y);
+  if (index===-1) return;
+  const item = game.items[index];
+  if (item.type==='health') {
+    game.player.health += item.amount;
+    if (game.player.health > 100) game.player.health=100;
+    alert(`Picked up health +${item.amount}`);
+  } else if (item.type==='weapon') {
+    game.player.weapon = item.weapon;
+    alert(`Picked up ${item.weapon.name}`);
+  } else if (item.type==='boss') {
+    // Should be handled as enemy
+  }
+  game.items.splice(index,1);
+  checkWin();
+  draw();
+}
+
+function checkWin() {
+  const bossAlive = game.enemies.some(e => e.boss);
+  if (!bossAlive && game.enemies.length > 0) {
+    // Player defeated boss
+    alert('Congratulations! You defeated the boss and won!');
+    game.won = true;
+  }
+}
