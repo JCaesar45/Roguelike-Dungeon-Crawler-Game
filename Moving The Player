@@ -1,0 +1,30 @@
+document.addEventListener('keydown', (e) => {
+  if (game.gameOver || game.won) return;
+  let dx=0, dy=0;
+  if (e.key==='ArrowUp') dy=-1;
+  if (e.key==='ArrowDown') dy=1;
+  if (e.key==='ArrowLeft') dx=-1;
+  if (e.key==='ArrowRight') dx=1;
+  if (dx!==0 || dy!==0) {
+    movePlayer(dx, dy);
+  }
+});
+
+function movePlayer(dx, dy) {
+  const newX = game.player.x + dx;
+  const newY = game.player.y + dy;
+  if (game.map[newY][newX]==='wall') return; // wall
+  // Check for enemy
+  const enemyIndex = game.enemies.findIndex(e => e.x===newX && e.y===newY);
+  if (enemyIndex!==-1) {
+    fightEnemy(enemyIndex);
+    return;
+  }
+  // Move
+  game.player.x = newX;
+  game.player.y = newY;
+  updateVisibility();
+  checkItems(newX, newY);
+  checkWin();
+  draw();
+}
