@@ -1,0 +1,35 @@
+function fightEnemy(index) {
+  const enemy = game.enemies[index];
+  alert(`Encountered enemy of level ${enemy.level}!`);
+  // Turn-based fight
+  while (enemy.health >0 && game.player.health >0) {
+    // Player attacks
+    const damage = randInt(game.player.weapon.damage[0], game.player.weapon.damage[1]) + game.player.level;
+    enemy.health -= damage;
+    if (enemy.health <= 0) {
+      alert('Enemy defeated!');
+      gainXP(enemy.level * 10);
+      game.enemies.splice(index,1);
+      break;
+    }
+    // Enemy attacks
+    const enemyDamage = randInt(enemy.level, enemy.level*2);
+    game.player.health -= enemyDamage;
+    if (game.player.health <=0) {
+      alert('You died!');
+      game.gameOver = true;
+      break;
+    }
+  }
+  updateVisibility();
+  draw();
+}
+
+function gainXP(amount) {
+  game.player.xp += amount;
+  if (game.player.xp >= (game.player.level*20)) {
+    game.player.level++;
+    game.player.xp=0;
+    alert(`Leveled up! Now level ${game.player.level}`);
+  }
+}
